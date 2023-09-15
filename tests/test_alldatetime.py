@@ -112,3 +112,39 @@ class TestAllDateTime(unittest.TestCase):
             self.assertEqual(alldatetime2 <= alldatetime1, not lt)
             self.assertEqual(alldatetime2 > alldatetime1, lt)
             self.assertEqual(alldatetime2 >= alldatetime1, le)
+
+    def test_strftime(self):
+        date_formats = [
+            (alldate(-5000, 1, 8), "5000-01-08 BC", "5000/01/08 BC"),
+            (alldate(-5000, 11, 8), "5000-11-08 BC", "5000/11/08 BC"),
+            (alldate(2000, 1, 8), "2000-01-08 AD", "2000/01/08 AD"),
+        ]
+        for d, s1, s2 in date_formats:
+            self.assertEqual(d.strftime("%Y-%m-%d"), s1)
+            self.assertEqual(d.strftime("%Y/%m/%d"), s2)
+
+        time_formats = [
+            (alltime(1, 15, 30, 1541), "01:15:30.001541", "01:15:30"),
+            (alltime(23, 5, 30, 0), "23:05:30.000000", "23:05:30")
+        ]
+        for t, s1, s2 in time_formats:
+            self.assertEqual(t.strftime("%H:%M:%S.%f"), s1)
+            self.assertEqual(t.strftime("%H:%M:%S"), s2)
+
+        datetime_formats = [
+            (alldatetime(-5000, 1, 8, 8, 30, 15), "5000-01-08 08:30:15 BC", "5000/01/08 08:30:15 BC"),
+            (alldatetime(2000, 1, 8, 8, 30, 15), "2000-01-08 08:30:15 AD", "2000/01/08 08:30:15 AD"),
+        ]
+        for dt, s1, s2 in datetime_formats:
+            self.assertEqual(dt.strftime("%Y-%m-%d %H:%M:%S"), s1)
+            self.assertEqual(dt.strftime("%Y/%m/%d %H:%M:%S"), s2)
+
+    def test_strptime(self):
+        datetime_formats = [
+            ("5000-01-08 08:30:15 BC", "5000/01/08 08:30:15 BC", alldatetime(-5000, 1, 8, 8, 30, 15)),
+            ("2000-01-08 08:30:15 AD", "2000/01/08 08:30:15 AD", alldatetime(2000, 1, 8, 8, 30, 15)),
+            ("2000-01-08 08:30:15", "2000/01/08 08:30:15", alldatetime(2000, 1, 8, 8, 30, 15))
+        ]
+        for s1, s2, dt in datetime_formats:
+            self.assertEqual(alldatetime.strptime(s1, "%Y-%m-%d %H:%M:%S"), dt)
+            self.assertEqual(alldatetime.strptime(s2, "%Y/%m/%d %H:%M:%S"), dt)

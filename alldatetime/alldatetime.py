@@ -1,11 +1,16 @@
-import time as _time
 import math as _math
+import time as _time
+from datetime import date, datetime, time
 from operator import index as _index
 
+__all__ = ("alldate", "alltime", "alldatetime")
 
 def _cmp(x, y):
     return 0 if x == y else 1 if x > y else -1
 
+
+BCENDING = " BC"
+ADENDING = " AD"
 
 _MONTHNAMES = [
     None,
@@ -222,6 +227,15 @@ class alldate:
 
     __str__ = isoformat
 
+    def strftime(self, format):
+        date_string = date(abs(self.year), self.month, self.day).strftime(format)
+        if self.year < 0:
+            date_string += BCENDING
+        else:
+            date_string += ADENDING
+
+        return date_string
+
 
 def _format_time(hh, mm, ss, us, timespec="auto"):
     specs = {
@@ -331,6 +345,9 @@ class alltime:
         return s
 
     __str__ = isoformat
+
+    def strftime(self, format):
+        return time(self.hour, self.minute, self.second, self.microsecond).strftime(format)
 
 
 class alldatetime():
@@ -448,3 +465,26 @@ class alldatetime():
         return s
 
     __str__ = isoformat
+
+    @classmethod
+    def strptime(cls, date_string, format):
+        bc = False
+        if date_string.endswith(BCENDING):
+            bc = True
+            date_string = date_string.rstrip(BCENDING)
+        if date_string.endswith(ADENDING):
+            bc = False
+            date_string = date_string.rstrip(ADENDING)
+        date_string = date_string.strip()
+        parsed_date = datetime.strptime(date_string, format)
+        year = parsed_date.year if not bc else -parsed_date.year
+        return cls(year, parsed_date.month, parsed_date.day, parsed_date.hour, parsed_date.minute, parsed_date.second, parsed_date.microsecond)
+
+    def strftime(self, format):
+        date_string = datetime(abs(self.year), self.month, self.day, self.hour, self.minute, self.second, self.microsecond).strftime(format)
+        if self.year < 0:
+            date_string += BCENDING
+        else:
+            date_string += ADENDING
+
+        return date_string
