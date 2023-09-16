@@ -143,8 +143,15 @@ class TestAllDateTime(unittest.TestCase):
         datetime_formats = [
             ("5000-01-08 08:30:15 BC", "5000/01/08 08:30:15 BC", alldatetime(-5000, 1, 8, 8, 30, 15)),
             ("2000-01-08 08:30:15 AD", "2000/01/08 08:30:15 AD", alldatetime(2000, 1, 8, 8, 30, 15)),
-            ("2000-01-08 08:30:15", "2000/01/08 08:30:15", alldatetime(2000, 1, 8, 8, 30, 15))
+            ("2000-01-08 08:30:15", "2000/01/08 08:30:15", alldatetime(2000, 1, 8, 8, 30, 15)),
         ]
         for s1, s2, dt in datetime_formats:
             self.assertEqual(alldatetime.strptime(s1, "%Y-%m-%d %H:%M:%S"), dt)
             self.assertEqual(alldatetime.strptime(s2, "%Y/%m/%d %H:%M:%S"), dt)
+
+        datetime_formats = [
+            ("5000 BC", alldatetime(-5000, 1, 1, 0, 0, 0)),
+            ("2000 AD", alldatetime(2000, 1, 1, 0, 0, 0)),
+        ]
+        for s, dt in datetime_formats:
+            self.assertEqual(alldatetime.strptime(s, "%Y"), dt)
