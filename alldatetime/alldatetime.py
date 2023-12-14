@@ -364,6 +364,7 @@ class alldateperiod:
     """
     Represents a time interval, consisting of a start time and an end time, forming an open-closed interval.
     """
+
     __slots__ = "_start_date", "_end_date", "_hashcode"
 
     def __init__(self, start_date: alldate, end_date: alldate):
@@ -382,6 +383,13 @@ class alldateperiod:
     @property
     def end_date(self):
         return self._end_date
+
+    def overlap_with(self, other):
+        if not isinstance(other, alldateperiod):
+            return False
+        return not (
+            self.end_date <= other.start_date or self.start_date >= other.end_date
+        )
 
     def __eq__(self, other):
         if isinstance(other, alldateperiod):

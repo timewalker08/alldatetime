@@ -136,6 +136,9 @@ class fuzzydate:
         period = self.to_alldateperiod()
         return (period.start_date.timestamp, period.end_date.timestamp)
 
-    def overlay_with(self, other):
+    def overlap_with(self, other):
         if not isinstance(other, fuzzydate):
             return False
+        self_period = self.to_alldateperiod()
+        other_period = other.to_alldateperiod()
+        return self_period.overlap_with(other_period)
