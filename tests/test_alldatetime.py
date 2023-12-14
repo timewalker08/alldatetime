@@ -1,10 +1,19 @@
 import unittest
+from datetime import timedelta
 
-from alldatetime.alldatetime import alldate, alldatetime, alltime
+from alldatetime.alldatetime import (
+    _is_leap,
+    _ord2ymd,
+    _ymd2ord,
+    alldate,
+    alldatetime,
+    alltime,
+)
 
 connection = ""
-class TestAllDateTime(unittest.TestCase):
 
+
+class TestAllDateTime(unittest.TestCase):
     def test_all_date(self):
         timestamps = [
             ((1970, 1, 1), 0),
@@ -38,7 +47,18 @@ class TestAllDateTime(unittest.TestCase):
             self.assertEqual(int(adt.timestamp), int(timestamp))
 
             adt = alldatetime.fromtimestamp(timestamp)
-            self.assertEqual(datetime, (adt.year, adt.month, adt.day, adt.hour, adt.minute, adt.second, adt.microsecond))
+            self.assertEqual(
+                datetime,
+                (
+                    adt.year,
+                    adt.month,
+                    adt.day,
+                    adt.hour,
+                    adt.minute,
+                    adt.second,
+                    adt.microsecond,
+                ),
+            )
             self.assertEqual(int(adt.timestamp), int(timestamp))
 
     def test_alldate_comparisons(self):
@@ -64,6 +84,26 @@ class TestAllDateTime(unittest.TestCase):
             self.assertEqual(alldate2 <= alldate1, not lt)
             self.assertEqual(alldate2 > alldate1, lt)
             self.assertEqual(alldate2 >= alldate1, le)
+
+    def test_alldate_add_timedelta(self):
+        add_dates = [
+            (alldate(-1201, 2, 1), timedelta(days=28), alldate(-1201, 2, 29)),
+            (alldate(-1, 12, 1), timedelta(days=1), alldate(-1, 12, 2)),
+            (alldate(-1, 12, 1), timedelta(days=30), alldate(-1, 12, 31)),
+            (alldate(-1, 12, 1), timedelta(days=31), alldate(1, 1, 1)),
+            (alldate(1999, 2, 1), timedelta(days=28), alldate(1999, 3, 1)),
+            (alldate(1999, 2, 1), timedelta(days=1), alldate(1999, 2, 2)),
+            (alldate(1999, 2, 1), timedelta(days=28), alldate(1999, 3, 1)),
+            (alldate(2000, 2, 1), timedelta(days=1), alldate(2000, 2, 2)),
+            (alldate(2000, 2, 1), timedelta(days=28), alldate(2000, 2, 29)),
+            (alldate(2023, 12, 1), timedelta(days=1), alldate(2023, 12, 2)),
+            (alldate(2023, 12, 1), timedelta(days=30), alldate(2023, 12, 31)),
+            (alldate(2023, 12, 1), timedelta(days=31), alldate(2024, 1, 1)),
+        ]
+
+        for date, delta, result in add_dates:
+            self.assertEqual(date + delta, result)
+            self.assertEqual(result - delta, date)
 
     def test_alltime_comparisons(self):
         dates = [
@@ -94,11 +134,41 @@ class TestAllDateTime(unittest.TestCase):
     def test_alldatetime_comparisons(self):
         dates = [
             # alldatetime1, alldatetime2, equal, less than, less than or equal
-            (alldatetime(1, 1, 1, 14, 10, 10, 1), alldatetime(1, 1, 1, 14, 10, 10, 1), True, False, True),
-            (alldatetime(1, 1, 1, 14, 10, 10, 2), alldatetime(1, 1, 1, 14, 10, 10, 1), False, False, False),
-            (alldatetime(1, 1, 2, 14, 10, 10, 1), alldatetime(1, 1, 1, 14, 10, 10, 1), False, False, False),
-            (alldatetime(1, 1, 1, 14, 10, 10, 1), alldatetime(1, 1, 1, 14, 10, 10, 2), False, True, True),
-            (alldatetime(1, 1, 1, 14, 10, 10, 1), alldatetime(1, 1, 2, 14, 10, 10, 1), False, True, True),
+            (
+                alldatetime(1, 1, 1, 14, 10, 10, 1),
+                alldatetime(1, 1, 1, 14, 10, 10, 1),
+                True,
+                False,
+                True,
+            ),
+            (
+                alldatetime(1, 1, 1, 14, 10, 10, 2),
+                alldatetime(1, 1, 1, 14, 10, 10, 1),
+                False,
+                False,
+                False,
+            ),
+            (
+                alldatetime(1, 1, 2, 14, 10, 10, 1),
+                alldatetime(1, 1, 1, 14, 10, 10, 1),
+                False,
+                False,
+                False,
+            ),
+            (
+                alldatetime(1, 1, 1, 14, 10, 10, 1),
+                alldatetime(1, 1, 1, 14, 10, 10, 2),
+                False,
+                True,
+                True,
+            ),
+            (
+                alldatetime(1, 1, 1, 14, 10, 10, 1),
+                alldatetime(1, 1, 2, 14, 10, 10, 1),
+                False,
+                True,
+                True,
+            ),
         ]
         for alldatetime1, alldatetime2, equal, lt, le in dates:
             self.assertEqual(alldatetime1 == alldatetime2, equal)
@@ -125,15 +195,23 @@ class TestAllDateTime(unittest.TestCase):
 
         time_formats = [
             (alltime(1, 15, 30, 1541), "01:15:30.001541", "01:15:30"),
-            (alltime(23, 5, 30, 0), "23:05:30.000000", "23:05:30")
+            (alltime(23, 5, 30, 0), "23:05:30.000000", "23:05:30"),
         ]
         for t, s1, s2 in time_formats:
             self.assertEqual(t.strftime("%H:%M:%S.%f"), s1)
             self.assertEqual(t.strftime("%H:%M:%S"), s2)
 
         datetime_formats = [
-            (alldatetime(-5000, 1, 8, 8, 30, 15), "5000-01-08 08:30:15 BC", "5000/01/08 08:30:15 BC"),
-            (alldatetime(2000, 1, 8, 8, 30, 15), "2000-01-08 08:30:15 AD", "2000/01/08 08:30:15 AD"),
+            (
+                alldatetime(-5000, 1, 8, 8, 30, 15),
+                "5000-01-08 08:30:15 BC",
+                "5000/01/08 08:30:15 BC",
+            ),
+            (
+                alldatetime(2000, 1, 8, 8, 30, 15),
+                "2000-01-08 08:30:15 AD",
+                "2000/01/08 08:30:15 AD",
+            ),
         ]
         for dt, s1, s2 in datetime_formats:
             self.assertEqual(dt.strftime("%Y-%m-%d %H:%M:%S"), s1)
@@ -141,9 +219,21 @@ class TestAllDateTime(unittest.TestCase):
 
     def test_strptime(self):
         datetime_formats = [
-            ("5000-01-08 08:30:15 BC", "5000/01/08 08:30:15 BC", alldatetime(-5000, 1, 8, 8, 30, 15)),
-            ("2000-01-08 08:30:15 AD", "2000/01/08 08:30:15 AD", alldatetime(2000, 1, 8, 8, 30, 15)),
-            ("2000-01-08 08:30:15", "2000/01/08 08:30:15", alldatetime(2000, 1, 8, 8, 30, 15)),
+            (
+                "5000-01-08 08:30:15 BC",
+                "5000/01/08 08:30:15 BC",
+                alldatetime(-5000, 1, 8, 8, 30, 15),
+            ),
+            (
+                "2000-01-08 08:30:15 AD",
+                "2000/01/08 08:30:15 AD",
+                alldatetime(2000, 1, 8, 8, 30, 15),
+            ),
+            (
+                "2000-01-08 08:30:15",
+                "2000/01/08 08:30:15",
+                alldatetime(2000, 1, 8, 8, 30, 15),
+            ),
         ]
         for s1, s2, dt in datetime_formats:
             self.assertEqual(alldatetime.strptime(s1, "%Y-%m-%d %H:%M:%S"), dt)
@@ -155,3 +245,47 @@ class TestAllDateTime(unittest.TestCase):
         ]
         for s, dt in datetime_formats:
             self.assertEqual(alldatetime.strptime(s, "%Y"), dt)
+
+    def test__ymd2ord(self):
+        ymd2ords = [
+            ((1, 1, 1), 0),
+            ((1, 1, 2), 1),
+            ((1, 12, 31), 364),
+            ((2, 1, 1), 365),
+            ((1600, 12, 31), 584387),
+            ((1601, 1, 1), 584388),
+            ((2023, 12, 14), 738867),
+            ((-1, 12, 31), -1),
+            ((-1, 12, 30), -2),
+            ((-1, 1, 1), -366),
+            ((-2, 12, 31), -367),
+            ((-5, 12, 31), -1462),
+            ((-6, 12, 31), -1828),
+        ]
+
+        for ymd, ord in ymd2ords:
+            year, month, day = ymd
+            self.assertEqual(_ymd2ord(year, month, day), ord)
+            self.assertEqual(_ord2ymd(ord), ymd)
+
+    def test__is_leap(self):
+        leaps = [
+            (1, False),
+            (4, True),
+            (100, False),
+            (400, True),
+            (1956, True),
+            (2008, True),
+            (-1, True),
+            (-2, False),
+            (-5, True),
+            (-100, False),
+            (-101, False),
+            (-201, False),
+            (-300, False),
+            (-301, False),
+            (-401, True),
+        ]
+
+        for year, leap in leaps:
+            self.assertEqual(_is_leap(year), leap)
