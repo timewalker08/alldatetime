@@ -67,6 +67,10 @@ ordinal = date.toordinal()
 print(ordinal) # -1
 ```
 
+#### `weekday(self) -> int`
+Return day of the week, where Monday == 0 ... Sunday == 6.
+- **Returns**: Return day of the week, where Monday == 0 ... Sunday == 6.
+
 ### Properties
 
 - `year`: The year of the date.
@@ -145,6 +149,10 @@ alldatetime.strptime("5000/01/08 08:30:15 BC", "%Y/%m/%d %H:%M:%S")    # alldate
 alldatetime.strptime("2000-01-08 08:30:15 AD", "%Y-%m-%d %H:%M:%S")    # alldatetime(2000, 1, 8, 8, 30, 15)
 alldatetime.strptime("2000-01-08 08:30:15", "%Y-%m-%d %H:%M:%S")       # alldatetime(2000, 1, 8, 8, 30, 15)
 ```
+
+#### `weekday(self) -> int`
+Return day of the week, where Monday == 0 ... Sunday == 6.
+- **Returns**: Return day of the week, where Monday == 0 ... Sunday == 6.
 
 ### Properties
 

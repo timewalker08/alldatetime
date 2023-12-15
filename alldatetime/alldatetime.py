@@ -262,7 +262,7 @@ class alldate:
     def timestamp(self) -> float:
         return self._timestamp
     
-    def weekday(self):
+    def weekday(self) -> int:
         "Return day of the week, where Monday == 0 ... Sunday == 6."
         return (self.toordinal() + 7) % 7
 
@@ -648,6 +648,10 @@ class alldatetime:
             self._time.second,
             self._time.microsecond,
         )
+    
+    def weekday(self) -> int:
+        "Return day of the week, where Monday == 0 ... Sunday == 6."
+        return self._date.weekday()
 
     def __eq__(self, other):
         if isinstance(other, alldatetime):

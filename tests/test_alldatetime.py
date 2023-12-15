@@ -385,6 +385,7 @@ class TestAllDateTime(unittest.TestCase):
             (alldate(1, 1, 7), 6),
             (alldate(1599, 12, 24), 4),
             (alldate(2023, 12, 15), 4),
+            (alldatetime(2023, 12, 15), 4)
         ]
 
         for date, weekday in dates:
