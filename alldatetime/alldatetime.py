@@ -261,6 +261,10 @@ class alldate:
     @property
     def timestamp(self) -> float:
         return self._timestamp
+    
+    def weekday(self):
+        "Return day of the week, where Monday == 0 ... Sunday == 6."
+        return (self.toordinal() + 7) % 7
 
     # Comparisons of date objects with other.
 

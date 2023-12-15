@@ -373,3 +373,19 @@ class TestAllDateTime(unittest.TestCase):
         ]
         for period, date, cover in periods:
             self.assertEqual(period.cover(date), cover)
+
+    def test_alldate_weekday(self):
+        dates = [
+            (alldate(-1, 12, 24), 6),
+            (alldate(-1, 12, 25), 0),
+            (alldate(-1, 12, 30), 5),
+            (alldate(-1, 12, 31), 6),
+            (alldate(1, 1, 1), 0),
+            (alldate(1, 1, 2), 1),
+            (alldate(1, 1, 7), 6),
+            (alldate(1599, 12, 24), 4),
+            (alldate(2023, 12, 15), 4),
+        ]
+
+        for date, weekday in dates:
+            self.assertEqual(date.weekday(), weekday)
