@@ -1,8 +1,15 @@
 import unittest
 from datetime import timedelta
 
-from alldatetime.alldatetime import (_is_leap, _ord2ymd, _ymd2ord, alldate,
-                                     alldateperiod, alldatetime, alltime)
+from alldatetime.alldatetime import (
+    _is_leap,
+    _ord2ymd,
+    _ymd2ord,
+    alldate,
+    alldateperiod,
+    alldatetime,
+    alltime,
+)
 
 connection = ""
 
@@ -286,16 +293,83 @@ class TestAllDateTime(unittest.TestCase):
 
     def test_alldateperiod(self):
         periods = [
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 10, 10), alldate(2023, 11, 30)), False),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 10, 10), alldate(2023, 12, 1)), False),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 10, 10), alldate(2023, 12, 3)), True),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 3)), True),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 10, 10), alldate(2023, 12, 31)), True),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 31)), True),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 12, 5), alldate(2023, 12, 31)), False),
-            (alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)), alldateperiod(alldate(2023, 12, 6), alldate(2023, 12, 31)), False),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 10, 10), alldate(2023, 11, 30)),
+                False,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 10, 10), alldate(2023, 12, 1)),
+                False,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 10, 10), alldate(2023, 12, 3)),
+                True,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 3)),
+                True,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 10, 10), alldate(2023, 12, 31)),
+                True,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 31)),
+                True,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 12, 5), alldate(2023, 12, 31)),
+                False,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldateperiod(alldate(2023, 12, 6), alldate(2023, 12, 31)),
+                False,
+            ),
         ]
 
         for period1, period2, overlap in periods:
             self.assertEqual(period1.overlap_with(period2), overlap)
             self.assertEqual(period2.overlap_with(period1), overlap)
+
+        with self.assertRaises(ValueError):
+            alldateperiod(None, alldate(202, 1, 1))
+        with self.assertRaises(ValueError):
+            alldateperiod(alldate(202, 1, 2), alldate(202, 1, 1))
+
+        periods = [
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldate(2023, 10, 30),
+                False,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldate(2023, 12, 1),
+                True,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldate(2023, 12, 4),
+                True,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldate(2023, 12, 5),
+                False,
+            ),
+            (
+                alldateperiod(alldate(2023, 12, 1), alldate(2023, 12, 5)),
+                alldate(2023, 12, 31),
+                False,
+            ),
+        ]
+        for period, date, cover in periods:
+            self.assertEqual(period.cover(date), cover)

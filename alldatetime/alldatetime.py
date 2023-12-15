@@ -13,8 +13,6 @@ def _cmp(x, y):
 BCENDING = " BC"
 ADENDING = " AD"
 
-_MAXORDINAL = 3652059
-
 _MONTHNAMES = [
     None,
     "Jan",
@@ -236,7 +234,7 @@ class alldate:
         return cls.fromtimestamp(t)
 
     @classmethod
-    def fromordinal(cls, n):
+    def fromordinal(cls, n: int):
         """Construct a date from a proleptic Gregorian ordinal.
 
         January 1 of year 1 is day 0.  Only the year, month and day are
@@ -246,22 +244,22 @@ class alldate:
         return cls(y, m, d)
 
     @property
-    def year(self):
+    def year(self) -> int:
         """year (1-9999)"""
         return self._year
 
     @property
-    def month(self):
+    def month(self) -> int:
         """month (1-12)"""
         return self._month
 
     @property
-    def day(self):
+    def day(self) -> int:
         """day (1-31)"""
         return self._day
 
     @property
-    def timestamp(self):
+    def timestamp(self) -> float:
         return self._timestamp
 
     # Comparisons of date objects with other.
@@ -319,9 +317,7 @@ class alldate:
         "Add a date to a timedelta."
         if isinstance(other, timedelta):
             o = self.toordinal() + other.days
-            if o <= _MAXORDINAL:
-                return type(self).fromordinal(o)
-            raise OverflowError("result out of range")
+            return type(self).fromordinal(o)
         return NotImplemented
 
     __radd__ = __add__
@@ -372,6 +368,8 @@ class alldateperiod:
             raise ValueError("start_date should not be None.")
         if end_date is None:
             raise ValueError("end_date should not be None.")
+        if start_date > end_date:
+            raise ValueError("start_date should be earlier than end_date.")
         self._start_date = start_date
         self._end_date = end_date
         self._hashcode = -1
@@ -384,12 +382,17 @@ class alldateperiod:
     def end_date(self):
         return self._end_date
 
-    def overlap_with(self, other):
+    def overlap_with(self, other) -> bool:
         if not isinstance(other, alldateperiod):
             return False
         return not (
             self.end_date <= other.start_date or self.start_date >= other.end_date
         )
+    
+    def cover(self, date: alldate) -> bool:
+        if not isinstance(date, alldate):
+            raise ValueError("date should be of type alldate.")
+        return date >= self._start_date and date < self._end_date
 
     def __eq__(self, other):
         if isinstance(other, alldateperiod):
@@ -563,14 +566,21 @@ class alldatetime:
     __slots__ = ("_date", "_time", "_hashcode")
 
     def __init__(
-        self, year, month=None, day=None, hour=0, minute=0, second=0, microsecond=0
+        self,
+        year: int,
+        month: int,
+        day: int,
+        hour: int = 0,
+        minute: int = 0,
+        second: int = 0,
+        microsecond: int = 0,
     ):
         self._date = alldate(year, month, day)
         self._time = alltime(hour, minute, second, microsecond)
         self._hashcode = -1
 
     @classmethod
-    def fromtimestamp(cls, timestamp):
+    def fromtimestamp(cls, timestamp: int):
         frac, timestamp = _math.modf(timestamp)
         us = round(frac * 1e6)
         if us >= 1000000:
@@ -623,11 +633,11 @@ class alldatetime:
     def timestamp(self):
         return self._date.timestamp + self._time.seconds_from_zero_hour()
 
-    def date(self):
+    def date(self) -> alldate:
         "Return the date part."
         return alldate(self._date.year, self._date.month, self._date.day)
 
-    def time(self):
+    def time(self) -> alltime:
         return alltime(
             self._time.hour,
             self._time.minute,
@@ -711,7 +721,7 @@ class alldatetime:
     __str__ = isoformat
 
     @classmethod
-    def strptime(cls, date_string, format):
+    def strptime(cls, date_string: str, format: str):
         bc = False
         if date_string.endswith(BCENDING):
             bc = True

@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "alldatetime"
-version = "0.1.2"
+version = "0.1.4"
 authors = [
   { name="Simin Lin", email="timewalker08@outlook.com" },
 ]
-description = "A lightweight datetime library support year from -100000 to 100000."
+description = "This is a lightweight Python library for representing time and dates, with no restrictions on the year range. (Unlike the datetime library in CPython, which has a year range from 1 to 9999.) It also supports fuzzy dates, allowing for representation of uncertain times (i.e., you can specify only the year, month, or day). For example, it can represent dates like 1912, or March 1912, etc."
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [

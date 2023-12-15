@@ -56,6 +56,7 @@ class fuzzydate:
         ) = self._check_parameters(
             year, month, day, precision, forward_precision, backward_precision
         )
+        self._anchor = alldate(self._year, self._month or 1, self._day or 1)
 
     def _check_parameters(
         self,
@@ -111,6 +112,10 @@ class fuzzydate:
         return self._day
 
     @property
+    def anchor(self):
+        return self._anchor
+
+    @property
     def forward_precision(self):
         return self._forward_precision
 
@@ -118,11 +123,12 @@ class fuzzydate:
     def backward_precision(self):
         return self._backward_precision
 
-    def to_alldateperiod(self):
-        anchor = alldate(self.year, self.month or 1, self.day or 1)
+    def to_alldateperiod(self) -> alldateperiod:
         forward_timedelta = self._precision_to_timedelta(self.forward_precision)
         backward_timedelta = self._precision_to_timedelta(self.backward_precision)
-        return alldateperiod(anchor - forward_timedelta, anchor + backward_timedelta)
+        return alldateperiod(
+            self.anchor - forward_timedelta, self.anchor + backward_timedelta
+        )
 
     def _precision_to_timedelta(self, precision: Precision):
         if precision.unit == PrecisionUnit.Year:
@@ -132,13 +138,48 @@ class fuzzydate:
         if precision.unit == PrecisionUnit.Day:
             return timedelta(days=precision.num)
 
-    def to_alldateperiod_timestamps(self):
+    def to_alldateperiod_timestamps(self) -> tuple[float, float]:
         period = self.to_alldateperiod()
         return (period.start_date.timestamp, period.end_date.timestamp)
 
-    def overlap_with(self, other):
+    def overlap_with(self, other) -> bool:
         if not isinstance(other, fuzzydate):
             return False
         self_period = self.to_alldateperiod()
         other_period = other.to_alldateperiod()
         return self_period.overlap_with(other_period)
+
+
+class fuzzydateperiod:
+    __slots__ = "_start_date", "_end_date", "_hashcode"
+
+    def __init__(self, start_date: fuzzydate, end_date: fuzzydate):
+        if start_date is None:
+            raise ValueError("start_date should not be None.")
+        if end_date is None:
+            raise ValueError("end_date should not be None.")
+        if start_date.anchor > end_date.anchor:
+            raise ValueError("start_date should be earlier than end_date.")
+        self._start_date = start_date
+        self._end_date = end_date
+        self._hashcode = -1
+
+    @property
+    def start_date(self):
+        return self._start_date
+
+    @property
+    def end_date(self):
+        return self._end_date
+
+    def cover(self, date: fuzzydate):
+        if date is None:
+            raise ValueError("date should not be None.")
+        start_period = self._start_date.to_alldateperiod()
+        end_period = self._end_date.to_alldateperiod()
+        date_period = date.to_alldateperiod()
+        start_date = start_period.start_date
+        end_date = end_period.end_date
+        return not (
+            start_date >= date_period.end_date or end_date <= date_period.start_date
+        )
