@@ -731,6 +731,9 @@ class alldatetime:
     @classmethod
     def strptime(cls, date_string: str, format: str):
         bc = False
+        if date_string.startswith("-"):
+            bc = True
+            date_string = date_string.lstrip("-")
         if date_string.endswith(BCENDING):
             bc = True
             date_string = date_string.rstrip(BCENDING)
